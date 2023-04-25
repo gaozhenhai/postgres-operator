@@ -1747,12 +1747,13 @@ func (c *Cluster) generateService(role PostgresRole, spec *acidv1.PostgresSpec) 
 func (c *Cluster) configureLoadBalanceService(serviceSpec *v1.ServiceSpec, sourceRanges []string) {
 	// spec.AllowedSourceRanges evaluates to the empty slice of zero length
 	// when omitted or set to 'null'/empty sequence in the PG manifest
+	/* remove default loadbalancer sourceranges
 	if len(sourceRanges) > 0 {
 		serviceSpec.LoadBalancerSourceRanges = sourceRanges
 	} else {
 		// safe default value: lock a load balancer only to the local address unless overridden explicitly
 		serviceSpec.LoadBalancerSourceRanges = []string{localHost}
-	}
+	}*/
 
 	c.logger.Debugf("final load balancer source ranges as seen in a service spec (not necessarily applied): %q", serviceSpec.LoadBalancerSourceRanges)
 	serviceSpec.ExternalTrafficPolicy = v1.ServiceExternalTrafficPolicyType(c.OpConfig.ExternalTrafficPolicy)
@@ -1771,6 +1772,7 @@ func (c *Cluster) generateServiceAnnotations(role PostgresRole, spec *acidv1.Pos
 		}
 	}
 
+	/* remove default external loadbalancer
 	if c.shouldCreateLoadBalancerForService(role, spec) {
 		var dnsName string
 		if role == Master {
@@ -1786,7 +1788,7 @@ func (c *Cluster) generateServiceAnnotations(role PostgresRole, spec *acidv1.Pos
 		}
 		// External DNS name annotation is not customizable
 		annotations[constants.ZalandoDNSNameAnnotation] = dnsName
-	}
+	}*/
 
 	if len(annotations) == 0 {
 		return nil
