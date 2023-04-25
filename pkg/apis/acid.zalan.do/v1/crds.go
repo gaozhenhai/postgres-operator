@@ -27,12 +27,6 @@ const (
 // PostgresCRDResourceColumns definition of AdditionalPrinterColumns for postgresql CRD
 var PostgresCRDResourceColumns = []apiextv1.CustomResourceColumnDefinition{
 	{
-		Name:        "Team",
-		Type:        "string",
-		Description: "Team responsible for Postgres cluster",
-		JSONPath:    ".spec.teamId",
-	},
-	{
 		Name:        "Version",
 		Type:        "string",
 		Description: "PostgreSQL version",
@@ -136,7 +130,7 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 			},
 			"spec": {
 				Type:     "object",
-				Required: []string{"numberOfInstances", "teamId", "postgresql", "volume"},
+				Required: []string{"numberOfInstances", "postgresql", "volume"},
 				Properties: map[string]apiextv1.JSONSchemaProps{
 					"additionalVolumes": {
 						Type: "array",

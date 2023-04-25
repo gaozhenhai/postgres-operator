@@ -33,7 +33,7 @@ type PostgresSpec struct {
 	EnableReplicaConnectionPooler *bool             `json:"enableReplicaConnectionPooler,omitempty"`
 	ConnectionPooler              *ConnectionPooler `json:"connectionPooler,omitempty"`
 
-	TeamID      string `json:"teamId"`
+	TeamID      string `json:"teamId,omitempty"`
 	DockerImage string `json:"dockerImage,omitempty"`
 
 	SpiloRunAsUser  *int64 `json:"spiloRunAsUser,omitempty"`

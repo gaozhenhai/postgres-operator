@@ -47,6 +47,7 @@ func parseWeekday(s string) (time.Weekday, error) {
 }
 
 func extractClusterName(clusterName string, teamName string) (string, error) {
+	/* remove teamName validation
 	teamNameLen := len(teamName)
 	if len(clusterName) < teamNameLen+2 {
 		return "", fmt.Errorf("cluster name must match {TEAM}-{NAME} format. Got cluster name '%v', team name '%v'", clusterName, teamName)
@@ -58,7 +59,8 @@ func extractClusterName(clusterName string, teamName string) (string, error) {
 
 	if strings.ToLower(clusterName[:teamNameLen+1]) != strings.ToLower(teamName)+"-" {
 		return "", fmt.Errorf("name must match {TEAM}-{NAME} format")
-	}
+	}*/
+
 	if len(clusterName) > clusterNameMaxLength {
 		return "", fmt.Errorf("name cannot be longer than %d characters", clusterNameMaxLength)
 	}
@@ -67,7 +69,8 @@ func extractClusterName(clusterName string, teamName string) (string, error) {
 			serviceNameRegexString)
 	}
 
-	return clusterName[teamNameLen+1:], nil
+	// return clusterName[teamNameLen+1:], nil
+	return clusterName, nil
 }
 
 func validateCloneClusterDescription(clone *CloneDescription) error {

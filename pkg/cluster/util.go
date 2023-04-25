@@ -244,7 +244,8 @@ func getPostgresContainer(podSpec *v1.PodSpec) (pgContainer v1.Container) {
 func (c *Cluster) getTeamMembers(teamID string) ([]string, error) {
 
 	if teamID == "" {
-		return nil, fmt.Errorf("no teamId specified")
+		// return nil, fmt.Errorf("no teamId specified")
+		return []string{}, nil
 	}
 
 	members := []string{}
@@ -468,7 +469,7 @@ func (c *Cluster) labelsSet(shouldAddExtraLabels bool) labels.Set {
 
 	if shouldAddExtraLabels {
 		// enables filtering resources owned by a team
-		lbls["team"] = c.Postgresql.Spec.TeamID
+		// lbls["team"] = c.Postgresql.Spec.TeamID
 
 		// allow to inherit certain labels from the 'postgres' object
 		if spec, err := c.GetSpec(); err == nil {
