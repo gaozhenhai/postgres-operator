@@ -36,17 +36,17 @@ type Resources struct {
 	PodPriorityClassName          string              `name:"pod_priority_class_name"`
 	ClusterDomain                 string              `name:"cluster_domain" default:"cluster.local"`
 	SpiloPrivileged               bool                `name:"spilo_privileged" default:"false"`
-	SpiloAllowPrivilegeEscalation *bool               `name:"spilo_allow_privilege_escalation" default:"true"`
+	SpiloAllowPrivilegeEscalation *bool               `name:"spilo_allow_privilege_escalation" default:"false"`
 	AdditionalPodCapabilities     []string            `name:"additional_pod_capabilities" default:""`
-	ClusterLabels                 map[string]string   `name:"cluster_labels" default:"application:spilo"`
+	ClusterLabels                 map[string]string   `name:"cluster_labels" default:"app:pgsql"`
 	InheritedLabels               []string            `name:"inherited_labels" default:""`
 	InheritedAnnotations          []string            `name:"inherited_annotations" default:""`
 	DownscalerAnnotations         []string            `name:"downscaler_annotations"`
 	IgnoredAnnotations            []string            `name:"ignored_annotations"`
-	ClusterNameLabel              string              `name:"cluster_name_label" default:"cluster-name"`
+	ClusterNameLabel              string              `name:"cluster_name_label" default:"cluster"`
 	DeleteAnnotationDateKey       string              `name:"delete_annotation_date_key"`
 	DeleteAnnotationNameKey       string              `name:"delete_annotation_name_key"`
-	PodRoleLabel                  string              `name:"pod_role_label" default:"spilo-role"`
+	PodRoleLabel                  string              `name:"pod_role_label" default:"role"`
 	PodToleration                 map[string]string   `name:"toleration" default:""`
 	DefaultCPURequest             string              `name:"default_cpu_request" default:"100m"`
 	DefaultMemoryRequest          string              `name:"default_memory_request" default:"100Mi"`
@@ -92,7 +92,7 @@ type InfrastructureRole struct {
 
 // Auth describes authentication specific configuration parameters
 type Auth struct {
-	SecretNameTemplate            StringTemplate        `name:"secret_name_template" default:"{username}.{cluster}.credentials.{tprkind}.{tprgroup}"`
+	SecretNameTemplate            StringTemplate        `name:"secret_name_template" default:"{username}.{cluster}"`
 	PamRoleName                   string                `name:"pam_role_name" default:"zalandos"`
 	PamConfiguration              string                `name:"pam_configuration" default:"https://info.example.com/oauth2/tokeninfo?access_token= uid realm=/employees"`
 	TeamsAPIUrl                   string                `name:"teams_api_url" default:"https://teams.example.com/api/"`
@@ -101,7 +101,7 @@ type Auth struct {
 	InfrastructureRoles           []*InfrastructureRole `name:"-"`
 	InfrastructureRolesDefs       string                `name:"infrastructure_roles_secrets"`
 	SuperUsername                 string                `name:"super_username" default:"postgres"`
-	ReplicationUsername           string                `name:"replication_username" default:"standby"`
+	ReplicationUsername           string                `name:"replication_username" default:"replicator"`
 	AdditionalOwnerRoles          []string              `name:"additional_owner_roles" default:""`
 	EnablePasswordRotation        bool                  `name:"enable_password_rotation" default:"false"`
 	PasswordRotationInterval      uint32                `name:"password_rotation_interval" default:"90"`
@@ -164,7 +164,7 @@ type Config struct {
 	DockerImage             string            `name:"docker_image" default:"registry.opensource.zalan.do/acid/spilo-14:2.1-p6"`
 	SidecarImages           map[string]string `name:"sidecar_docker_images"` // deprecated in favour of SidecarContainers
 	SidecarContainers       []v1.Container    `name:"sidecars"`
-	PodServiceAccountName   string            `name:"pod_service_account_name" default:"postgres-pod"`
+	PodServiceAccountName   string            `name:"pod_service_account_name" default:"postgres-cluster"`
 	// value of this string must be valid JSON or YAML; see initPodServiceAccount
 	PodServiceAccountDefinition            string            `name:"pod_service_account_definition" default:""`
 	PodServiceAccountRoleBindingDefinition string            `name:"pod_service_account_role_binding_definition" default:""`
@@ -191,7 +191,7 @@ type Config struct {
 	EnableAdminRoleForUsers                bool              `name:"enable_admin_role_for_users" default:"true"`
 	EnablePostgresTeamCRD                  bool              `name:"enable_postgres_team_crd" default:"false"`
 	EnablePostgresTeamCRDSuperusers        bool              `name:"enable_postgres_team_crd_superusers" default:"false"`
-	EnableMasterLoadBalancer               bool              `name:"enable_master_load_balancer" default:"true"`
+	EnableMasterLoadBalancer               bool              `name:"enable_master_load_balancer" default:"false"`
 	EnableMasterPoolerLoadBalancer         bool              `name:"enable_master_pooler_load_balancer" default:"false"`
 	EnableReplicaLoadBalancer              bool              `name:"enable_replica_load_balancer" default:"false"`
 	EnableReplicaPoolerLoadBalancer        bool              `name:"enable_replica_pooler_load_balancer" default:"false"`
@@ -205,7 +205,7 @@ type Config struct {
 	MasterDNSNameFormat                    StringTemplate    `name:"master_dns_name_format" default:"{cluster}.{team}.{hostedzone}"`
 	ReplicaDNSNameFormat                   StringTemplate    `name:"replica_dns_name_format" default:"{cluster}-repl.{team}.{hostedzone}"`
 	PDBNameFormat                          StringTemplate    `name:"pdb_name_format" default:"postgres-{cluster}-pdb"`
-	EnablePodDisruptionBudget              *bool             `name:"enable_pod_disruption_budget" default:"true"`
+	EnablePodDisruptionBudget              *bool             `name:"enable_pod_disruption_budget" default:"false"`
 	EnableInitContainers                   *bool             `name:"enable_init_containers" default:"true"`
 	EnableSidecars                         *bool             `name:"enable_sidecars" default:"true"`
 	Workers                                uint32            `name:"workers" default:"8"`
