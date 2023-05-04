@@ -99,7 +99,7 @@ func (c *Cluster) pgConnectionString(dbname string) string {
 	}
 
 	return fmt.Sprintf("host='%s' dbname='%s' sslmode=require user='%s' password='%s' connect_timeout='%d'",
-		fmt.Sprintf("%s.%s.svc.%s", c.Name, c.Namespace, c.OpConfig.ClusterDomain),
+		fmt.Sprintf("%s.%s.svc", c.Name, c.Namespace),
 		dbname,
 		c.systemUsers[constants.SuperuserKeyName].Name,
 		strings.Replace(password, "$", "\\$", -1),
