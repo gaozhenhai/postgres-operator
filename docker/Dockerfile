@@ -1,15 +1,12 @@
 FROM alpine:3.16
-LABEL maintainer="Team ACID @ Zalando <team-acid@zalando.de>"
+MAINTAINER Zhenhai Gao <gaozh1988@live.com>
 
-# We need root certificates to deal with teams api over https
-RUN apk --no-cache add curl
-RUN apk --no-cache add ca-certificates
+ENV TZ="Asia/Shanghai"
 
 COPY build/* /
-
-RUN addgroup -g 1000 pgo
-RUN adduser -D -u 1000 -G pgo -g 'Postgres Operator' pgo
+RUN apk --no-cache add curl ca-certificates tzdata && \
+    addgroup -g 1000 pgo && \
+    adduser -D -u 1000 -G pgo -g 'Postgres Operator' pgo
 
 USER 1000:1000
-
 ENTRYPOINT ["/postgres-operator"]
