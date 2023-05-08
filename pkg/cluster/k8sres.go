@@ -460,11 +460,14 @@ func generatePodAffinity(labels labels.Set, topologyKey string, nodeAffinity *v1
 	// generate pod anti-affinity to avoid multiple pods of the same Postgres cluster in the same topology , e.g. node
 	podAffinity := v1.Affinity{
 		PodAntiAffinity: &v1.PodAntiAffinity{
-			RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{{
-				LabelSelector: &metav1.LabelSelector{
-					MatchLabels: labels,
+			PreferredDuringSchedulingIgnoredDuringExecution: []v1.WeightedPodAffinityTerm{{
+				Weight: int32(100),
+				PodAffinityTerm: v1.PodAffinityTerm{
+					LabelSelector: &metav1.LabelSelector{
+						MatchLabels: labels,
+					},
+					TopologyKey: topologyKey,
 				},
-				TopologyKey: topologyKey,
 			}},
 		},
 	}
