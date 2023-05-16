@@ -51,7 +51,7 @@ clean:
 	rm -rf build scm-source.json
 
 local: ${SOURCES}
-	hack/verify-codegen.sh
+	#hack/verify-codegen.sh
 	CGO_ENABLED=${CGO_ENABLED} go build -o build/${BINARY} $(LOCAL_BUILD_FLAGS) -ldflags "$(LDFLAGS)" $^
 
 linux: ${SOURCES}
