@@ -1,8 +1,7 @@
-{{ if .Values.rbac.create }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "postgres-operator.serviceAccountName" . }}
+  name: postgres-operator
   labels:
     app.kubernetes.io/name: {{ template "postgres-operator.name" . }}
     helm.sh/chart: {{ template "postgres-operator.chart" . }}
@@ -11,9 +10,8 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ include "postgres-operator.serviceAccountName" . }}
+  name: postgres-operator
 subjects:
 - kind: ServiceAccount
-  name: {{ include "postgres-operator.serviceAccountName" . }}
+  name: postgres-operator
   namespace: {{ .Release.Namespace }}
-{{ end }}
