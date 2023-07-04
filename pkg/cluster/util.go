@@ -442,6 +442,22 @@ func (c *Cluster) waitForAllPodsLabelReady() error {
 	return c._waitPodLabelsReady(false)
 }
 
+func (c *Cluster) waitForAllPodsDeleted() error {
+	return retryutil.Retry(c.OpConfig.ResourceCheckInterval, c.OpConfig.ResourceCheckTimeout,
+		func() (bool, error) {
+			listOptions := metav1.ListOptions{
+				LabelSelector: c.labelsSet(false).String(),
+			}
+
+			pods, err := c.KubeClient.Pods(c.Namespace).List(context.TODO(), listOptions)
+			if err != nil {
+				return false, err
+			}
+
+			return len(pods.Items) == 0, nil
+		})
+}
+
 func (c *Cluster) waitStatefulsetPodsReady() error {
 	c.setProcessName("waiting for the pods of the statefulset")
 	// TODO: wait for the first Pod only

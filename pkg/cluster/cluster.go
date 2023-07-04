@@ -742,15 +742,27 @@ func (c *Cluster) compareServices(old, new *v1.Service) (bool, string) {
 func (c *Cluster) Update(oldSpec, newSpec *acidv1.Postgresql) error {
 	updateFailed := false
 	syncStatefulSet := false
+	stopFailed := false
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusUpdating)
+	if newSpec.Spec.Pause && !oldSpec.Spec.Pause {
+		c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusStopping)
+	} else if !newSpec.Spec.Pause && oldSpec.Spec.Pause {
+		c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusStarting)
+	} else if !newSpec.Spec.Pause && !oldSpec.Spec.Pause {
+		c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusUpdating)
+	}
+
 	c.setSpec(newSpec)
 
 	defer func() {
-		if updateFailed {
+		if stopFailed {
+			c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusStopFailed)
+		} else if newSpec.Spec.Pause {
+			c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusStopped)
+		} else if updateFailed {
 			c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusUpdateFailed)
 		} else {
 			c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusRunning)
@@ -834,6 +846,14 @@ func (c *Cluster) Update(oldSpec, newSpec *acidv1.Postgresql) error {
 			if err := c.syncStatefulSet(); err != nil {
 				c.logger.Errorf("could not sync statefulsets: %v", err)
 				updateFailed = true
+			}
+
+			if newSpec.Spec.Pause && !oldSpec.Spec.Pause {
+				if err := c.waitForAllPodsDeleted(); err != nil {
+					c.logger.Warningf("could not delete all pod %v", err)
+					stopFailed = true
+				}
+				return
 			}
 		}
 	}()

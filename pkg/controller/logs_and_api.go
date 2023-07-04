@@ -16,10 +16,14 @@ import (
 
 // ClusterStatus provides status of the cluster
 func (c *Controller) ClusterStatus(team, namespace, cluster string) (*cluster.ClusterStatus, error) {
+	name := cluster
+	if team != "" {
+		name = team + "-" + cluster
+	}
 
 	clusterName := spec.NamespacedName{
 		Namespace: namespace,
-		Name:      team + "-" + cluster,
+		Name:      name,
 	}
 
 	c.clustersMu.RLock()
@@ -93,10 +97,14 @@ func (c *Controller) GetStatus() *spec.ControllerStatus {
 
 // ClusterLogs dumps cluster ring logs
 func (c *Controller) ClusterLogs(team, namespace, name string) ([]*spec.LogEntry, error) {
+	cluster := name
+	if team != "" {
+		cluster = team + "-" + name
+	}
 
 	clusterName := spec.NamespacedName{
 		Namespace: namespace,
-		Name:      team + "-" + name,
+		Name:      cluster,
 	}
 
 	c.clustersMu.RLock()
@@ -216,10 +224,14 @@ func (c *Controller) WorkerStatus(workerID uint32) (*cluster.WorkerStatus, error
 
 // ClusterHistory dumps history of cluster changes
 func (c *Controller) ClusterHistory(team, namespace, name string) ([]*spec.Diff, error) {
+	cluster := name
+	if team != "" {
+		cluster = team + "-" + name
+	}
 
 	clusterName := spec.NamespacedName{
 		Namespace: namespace,
-		Name:      team + "-" + name,
+		Name:      cluster,
 	}
 
 	c.clustersMu.RLock()

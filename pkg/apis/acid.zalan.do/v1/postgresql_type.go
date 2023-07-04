@@ -36,6 +36,8 @@ type PostgresSpec struct {
 	TeamID      string `json:"teamId,omitempty"`
 	DockerImage string `json:"dockerImage,omitempty"`
 
+	Pause bool `json:"pause,omitempty"`
+
 	SpiloRunAsUser  *int64 `json:"spiloRunAsUser,omitempty"`
 	SpiloRunAsGroup *int64 `json:"spiloRunAsGroup,omitempty"`
 	SpiloFSGroup    *int64 `json:"spiloFSGroup,omitempty"`

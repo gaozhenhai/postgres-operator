@@ -273,7 +273,7 @@ func (c *Cluster) generateConnectionPoolerPodTemplate(role PostgresRole) (
 	poolerContainer := v1.Container{
 		Name:            connectionPoolerContainer,
 		Image:           effectiveDockerImage,
-		ImagePullPolicy: v1.PullIfNotPresent,
+		ImagePullPolicy: v1.PullAlways,
 		Resources:       *resources,
 		Ports: []v1.ContainerPort{
 			{

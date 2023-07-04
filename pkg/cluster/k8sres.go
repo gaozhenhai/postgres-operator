@@ -80,7 +80,7 @@ func (c *Cluster) statefulSetName() string {
 func (c *Cluster) endpointName(role PostgresRole) string {
 	name := c.Name
 	if role == Replica {
-		name = name + "-repl"
+		name = c.Name + "-slave"
 	}
 
 	return name
@@ -89,7 +89,7 @@ func (c *Cluster) endpointName(role PostgresRole) string {
 func (c *Cluster) serviceName(role PostgresRole) string {
 	name := c.Name
 	if role == Replica {
-		name = name + "-repl"
+		name = c.Name + "-slave"
 	}
 
 	return name
@@ -559,7 +559,7 @@ func generateContainer(
 	return &v1.Container{
 		Name:            name,
 		Image:           *dockerImage,
-		ImagePullPolicy: v1.PullIfNotPresent,
+		ImagePullPolicy: v1.PullAlways,
 		Resources:       *resourceRequirements,
 		Ports: []v1.ContainerPort{
 			{
@@ -1050,7 +1050,7 @@ func getSidecarContainer(sidecar acidv1.Sidecar, index int, resources *v1.Resour
 	return &v1.Container{
 		Name:            name,
 		Image:           sidecar.DockerImage,
-		ImagePullPolicy: v1.PullIfNotPresent,
+		ImagePullPolicy: v1.PullAlways,
 		Resources:       *resources,
 		Env:             sidecar.Env,
 		Ports:           sidecar.Ports,
@@ -1465,6 +1465,9 @@ func (c *Cluster) getNumberOfInstances(spec *acidv1.PostgresSpec) int32 {
 	}
 	if newcur != cur {
 		c.logger.Infof("adjusted number of instances from %d to %d (min: %d, max: %d)", cur, newcur, min, max)
+	}
+	if spec.Pause {
+		newcur = int32(0)
 	}
 
 	return newcur

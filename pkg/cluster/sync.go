@@ -337,6 +337,11 @@ func (c *Cluster) syncStatefulSet() error {
 			c.logger.Debugf("%d / %d pod(s) still need to be rotated", len(podsToRecreate), len(pods))
 		}
 
+		isPauseToStart := false
+		if !c.Spec.Pause && c.Spec.NumberOfInstances > int32(0) && *sset.Spec.Replicas == int32(0) {
+			isPauseToStart = true
+		}
+
 		// statefulset is already there, make sure we use its definition in order to compare with the spec.
 		c.Statefulset = sset
 
@@ -369,6 +374,16 @@ func (c *Cluster) syncStatefulSet() error {
 					return fmt.Errorf("could not replace statefulset: %v", err)
 				}
 			}
+		}
+
+		if isPauseToStart {
+			if err := c.waitStatefulsetPodsReady(); err != nil {
+				return fmt.Errorf("cluster is not ready: %v", err)
+			}
+		}
+
+		if c.Spec.Pause {
+			return nil
 		}
 
 		if len(podsToRecreate) == 0 && !c.OpConfig.EnableLazySpiloUpgrade {
