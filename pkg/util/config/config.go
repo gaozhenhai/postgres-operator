@@ -16,7 +16,7 @@ import (
 type CRD struct {
 	ReadyWaitInterval     time.Duration `name:"ready_wait_interval" default:"4s"`
 	ReadyWaitTimeout      time.Duration `name:"ready_wait_timeout" default:"30s"`
-	ResyncPeriod          time.Duration `name:"resync_period" default:"30m"`
+	ResyncPeriod          time.Duration `name:"resync_period" default:"10m"`
 	RepairPeriod          time.Duration `name:"repair_period" default:"5m"`
 	EnableCRDRegistration *bool         `name:"enable_crd_registration" default:"true"`
 	EnableCRDValidation   *bool         `name:"enable_crd_validation" default:"true"`
@@ -26,10 +26,10 @@ type CRD struct {
 // Resources describes kubernetes resource specific configuration parameters
 type Resources struct {
 	ResourceCheckInterval         time.Duration       `name:"resource_check_interval" default:"3s"`
-	ResourceCheckTimeout          time.Duration       `name:"resource_check_timeout" default:"10m"`
-	PodLabelWaitTimeout           time.Duration       `name:"pod_label_wait_timeout" default:"10m"`
-	PodDeletionWaitTimeout        time.Duration       `name:"pod_deletion_wait_timeout" default:"10m"`
-	PodTerminateGracePeriod       time.Duration       `name:"pod_terminate_grace_period" default:"5m"`
+	ResourceCheckTimeout          time.Duration       `name:"resource_check_timeout" default:"5m"`
+	PodLabelWaitTimeout           time.Duration       `name:"pod_label_wait_timeout" default:"5m"`
+	PodDeletionWaitTimeout        time.Duration       `name:"pod_deletion_wait_timeout" default:"5m"`
+	PodTerminateGracePeriod       time.Duration       `name:"pod_terminate_grace_period" default:"3m"`
 	SpiloRunAsUser                *int64              `name:"spilo_runasuser"`
 	SpiloRunAsGroup               *int64              `name:"spilo_runasgroup"`
 	SpiloFSGroup                  *int64              `name:"spilo_fsgroup"`

@@ -159,6 +159,18 @@ func metaAnnotationsPatch(annotations map[string]string) ([]byte, error) {
 	}{&meta})
 }
 
+func finalizersPatch(finalizers []string) ([]byte, error) {
+	if len(finalizers) == 0 {
+		return []byte("{\"metadata\":{\"finalizers\":null}}"), nil
+	}
+
+	var meta metav1.ObjectMeta
+	meta.Finalizers = finalizers
+	return json.Marshal(struct {
+		ObjMeta interface{} `json:"metadata"`
+	}{&meta})
+}
+
 func (c *Cluster) logPDBChanges(old, new *policybeta1.PodDisruptionBudget, isUpdate bool, reason string) {
 	if isUpdate {
 		c.logger.Infof("pod disruption budget %q has been changed", util.NameFromMeta(old.ObjectMeta))

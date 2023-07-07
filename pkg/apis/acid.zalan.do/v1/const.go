@@ -14,6 +14,7 @@ const (
 	ClusterStatusStopped      = "Stopped"
 	ClusterStatusStopFailed   = "StopFailed"
 	ClusterStatusStarting     = "Starting"
+	ClusterStatusTerminating  = "Terminating"
 )
 
 const (

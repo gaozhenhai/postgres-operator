@@ -241,15 +241,18 @@ func (c *Cluster) replaceStatefulSet(newStatefulSet *appsv1.StatefulSet) error {
 
 func (c *Cluster) deleteStatefulSet() error {
 	c.setProcessName("deleting statefulset")
-	c.logger.Debugln("deleting statefulset")
+	c.logger.Info("removing the statefulset")
+
 	if c.Statefulset == nil {
-		return fmt.Errorf("there is no statefulset in the cluster")
+		c.logger.Debugf("there is no statefulset in the cluster")
+		return nil
 	}
 
 	err := c.KubeClient.StatefulSets(c.Statefulset.Namespace).Delete(context.TODO(), c.Statefulset.Name, c.deleteOptions)
-	if err != nil {
+	if err != nil && !k8sutil.ResourceNotFound(err) {
 		return err
 	}
+
 	c.logger.Infof("statefulset %q has been deleted", util.NameFromMeta(c.Statefulset.ObjectMeta))
 	c.Statefulset = nil
 
@@ -334,15 +337,15 @@ func (c *Cluster) updateService(role PostgresRole, oldService *v1.Service, newSe
 }
 
 func (c *Cluster) deleteService(role PostgresRole) error {
-	c.logger.Debugf("deleting service %s", role)
+	c.logger.Infof("removing service %s", role)
 
 	service, ok := c.Services[role]
-	if !ok {
+	if !ok || service == nil {
 		c.logger.Debugf("No service for %s role was found, nothing to delete", role)
 		return nil
 	}
 
-	if err := c.KubeClient.Services(service.Namespace).Delete(context.TODO(), service.Name, c.deleteOptions); err != nil {
+	if err := c.KubeClient.Services(service.Namespace).Delete(context.TODO(), service.Name, c.deleteOptions); err != nil && !k8sutil.ResourceNotFound(err) {
 		return err
 	}
 
@@ -439,16 +442,18 @@ func (c *Cluster) updatePodDisruptionBudget(pdb *policybeta1.PodDisruptionBudget
 }
 
 func (c *Cluster) deletePodDisruptionBudget() error {
-	c.logger.Debug("deleting pod disruption budget")
+	c.logger.Info("removing pod disruption budget")
+
 	if c.PodDisruptionBudget == nil {
-		return fmt.Errorf("there is no pod disruption budget in the cluster")
+		c.logger.Debugf("there is no pod disruption budget in the cluster")
+		return nil
 	}
 
 	pdbName := util.NameFromMeta(c.PodDisruptionBudget.ObjectMeta)
 	err := c.KubeClient.
 		PodDisruptionBudgets(c.PodDisruptionBudget.Namespace).
 		Delete(context.TODO(), c.PodDisruptionBudget.Name, c.deleteOptions)
-	if err != nil {
+	if err != nil && !k8sutil.ResourceNotFound(err) {
 		return fmt.Errorf("could not delete pod disruption budget: %v", err)
 	}
 	c.logger.Infof("pod disruption budget %q has been deleted", util.NameFromMeta(c.PodDisruptionBudget.ObjectMeta))
@@ -474,13 +479,15 @@ func (c *Cluster) deletePodDisruptionBudget() error {
 
 func (c *Cluster) deleteEndpoint(role PostgresRole) error {
 	c.setProcessName("deleting endpoint")
-	c.logger.Debugln("deleting endpoint")
+	c.logger.Infof("removing endpoint %v", role)
+
 	if c.Endpoints[role] == nil {
-		return fmt.Errorf("there is no %s endpoint in the cluster", role)
+		c.logger.Debugf("there is no %s endpoint in the cluster", role)
+		return nil
 	}
 
 	if err := c.KubeClient.Endpoints(c.Endpoints[role].Namespace).Delete(
-		context.TODO(), c.Endpoints[role].Name, c.deleteOptions); err != nil {
+		context.TODO(), c.Endpoints[role].Name, c.deleteOptions); err != nil && !k8sutil.ResourceNotFound(err) {
 		return fmt.Errorf("could not delete endpoint: %v", err)
 	}
 
@@ -495,6 +502,7 @@ func (c *Cluster) deleteSecrets() error {
 	c.setProcessName("deleting secrets")
 	errors := make([]string, 0)
 
+	c.logger.Info("removing the secret")
 	for uid, secret := range c.Secrets {
 		err := c.deleteSecret(uid, *secret)
 		if err != nil {
@@ -514,7 +522,7 @@ func (c *Cluster) deleteSecret(uid types.UID, secret v1.Secret) error {
 	secretName := util.NameFromMeta(secret.ObjectMeta)
 	c.logger.Debugf("deleting secret %q", secretName)
 	err := c.KubeClient.Secrets(secret.Namespace).Delete(context.TODO(), secret.Name, c.deleteOptions)
-	if err != nil {
+	if err != nil && !k8sutil.ResourceNotFound(err) {
 		return fmt.Errorf("could not delete secret %q: %v", secretName, err)
 	}
 	c.logger.Infof("secret %q has been deleted", secretName)

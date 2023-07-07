@@ -28,10 +28,10 @@ configGeneral:
   pod_management_policy: "parallel"
   additional_pod_capabilities: "SYS_RESOURCE"
 
-  resync_period: 30m
+  resync_period: 10m
   repair_period: 5m
   resource_check_interval: 3s
-  resource_check_timeout: 10m
+  resource_check_timeout: 5m
 
 nodeSelector: {}
 tolerations: []

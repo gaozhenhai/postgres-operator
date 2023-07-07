@@ -268,7 +268,7 @@ func (c *Controller) processEvent(event ClusterEvent) {
 		})
 	case EventDelete:
 		if !clusterFound {
-			lg.Errorf("unknown cluster: %q", clusterName)
+			//lg.Errorf("unknown cluster: %q", clusterName)
 			return
 		}
 		lg.Infoln("deletion of the cluster started")
@@ -307,14 +307,20 @@ func (c *Controller) processEvent(event ClusterEvent) {
 		}
 
 		c.curWorkerCluster.Store(event.WorkerID, cl)
-		if err := cl.Sync(event.NewSpec); err != nil {
-			cl.Error = fmt.Sprintf("could not sync cluster: %v", err)
-			c.eventRecorder.Eventf(cl.GetReference(), v1.EventTypeWarning, "Sync", "%v", cl.Error)
-			lg.Error(cl.Error)
+
+		if cl.ObjectMeta.DeletionTimestamp.IsZero() {
+			if err := cl.Sync(event.NewSpec); err != nil {
+				cl.Error = fmt.Sprintf("could not sync cluster: %v", err)
+				c.eventRecorder.Eventf(cl.GetReference(), v1.EventTypeWarning, "Sync", "%v", cl.Error)
+				lg.Error(cl.Error)
+			}
 			return
 		}
-		cl.Error = ""
 
+		lg.Infof("Cluster has a DeletionTimestamp of %s, starting deletion now.", cl.ObjectMeta.DeletionTimestamp.Format(time.RFC3339))
+		cl.Delete()
+
+		cl.Error = ""
 		lg.Infof("cluster has been synced")
 	}
 }
@@ -478,6 +484,8 @@ func (c *Controller) queueClusterEvent(informerOldSpec, informerNewSpec *acidv1.
 	if eventType != EventDelete {
 		return
 	}
+
+	c.KubeClient.SetPostgresCRDStatus(clusterName, acidv1.ClusterStatusTerminating)
 	// A delete event discards all prior requests for that cluster.
 	for _, evType := range []EventType{EventAdd, EventSync, EventUpdate, EventRepair} {
 		obj, exists, err := c.clusterEventQueues[workerID].GetByKey(queueClusterKey(evType, uid))
@@ -510,6 +518,12 @@ func (c *Controller) postgresqlAdd(obj interface{}) {
 func (c *Controller) postgresqlUpdate(prev, cur interface{}) {
 	pgOld := c.postgresqlCheck(prev)
 	pgNew := c.postgresqlCheck(cur)
+
+	if pgNew != nil && !pgNew.ObjectMeta.DeletionTimestamp.IsZero() {
+		c.queueClusterEvent(pgNew, nil, EventDelete)
+		return
+	}
+
 	if pgOld != nil && pgNew != nil {
 		// Avoid the inifinite recursion for status updates
 		if reflect.DeepEqual(pgOld.Spec, pgNew.Spec) {
