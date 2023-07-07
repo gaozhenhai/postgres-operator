@@ -43,7 +43,7 @@ func (c *Cluster) Sync(newSpec *acidv1.Postgresql) error {
 		if err != nil {
 			c.logger.Warningf("error while syncing cluster state: %v", err)
 			c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusSyncFailed)
-		} else if !c.Status.Running() {
+		} else if !c.Status.Running() && !c.Spec.Pause {
 			c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusRunning)
 		}
 	}()
@@ -82,6 +82,14 @@ func (c *Cluster) Sync(newSpec *acidv1.Postgresql) error {
 			err = fmt.Errorf("could not sync statefulsets: %v", err)
 			return err
 		}
+	}
+
+	if c.Spec.Pause && !c.Status.Stopped() {
+		if err := c.waitForAllPodsDeleted(); err != nil {
+			c.logger.Warningf("could not delete all pod %v", err)
+		}
+
+		c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusStopped)
 	}
 
 	c.logger.Debug("syncing pod disruption budgets")

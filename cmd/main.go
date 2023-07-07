@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/zalando/postgres-operator/pkg/controller"
@@ -69,7 +70,9 @@ func main() {
 	if config.EnableJsonLogging {
 		log.SetFormatter(&log.JSONFormatter{})
 	}
+
 	log.SetOutput(os.Stdout)
+	log.SetFormatter(&logrus.TextFormatter{FullTimestamp: true, TimestampFormat: "2006-02-01 15:04:05.000"})
 	log.Printf("Spilo operator %s\n", version)
 
 	sigs := make(chan os.Signal, 1)

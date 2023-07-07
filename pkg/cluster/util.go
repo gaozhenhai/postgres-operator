@@ -462,7 +462,7 @@ func (c *Cluster) waitForAllPodsDeleted() error {
 			}
 
 			pods, err := c.KubeClient.Pods(c.Namespace).List(context.TODO(), listOptions)
-			if err != nil {
+			if err != nil && !k8sutil.ResourceNotFound(err) {
 				return false, err
 			}
 

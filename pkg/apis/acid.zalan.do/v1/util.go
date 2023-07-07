@@ -99,6 +99,10 @@ func (postgresStatus PostgresStatus) Running() bool {
 	return postgresStatus.PostgresClusterStatus == ClusterStatusRunning
 }
 
+func (postgresStatus PostgresStatus) Stopped() bool {
+	return postgresStatus.PostgresClusterStatus == ClusterStatusStopped
+}
+
 // Creating status of cluster
 func (postgresStatus PostgresStatus) Creating() bool {
 	return postgresStatus.PostgresClusterStatus == ClusterStatusCreating

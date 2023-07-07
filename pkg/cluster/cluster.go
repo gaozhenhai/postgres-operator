@@ -916,6 +916,7 @@ func (c *Cluster) Update(oldSpec, newSpec *acidv1.Postgresql) error {
 			}
 
 			if newSpec.Spec.Pause && !oldSpec.Spec.Pause {
+				c.logger.Infof("stopping cluster %s", newSpec.Name)
 				if err := c.waitForAllPodsDeleted(); err != nil {
 					c.logger.Warningf("could not delete all pod %v", err)
 					stopFailed = true
@@ -1118,6 +1119,7 @@ func (c *Cluster) Delete() {
 	if isDeleteError {
 		c.eventRecorder.Event(c.GetReference(), v1.EventTypeWarning, "Delete", "Some resources could be successfully deleted yet")
 		c.logger.Warningf("some error(s) occured when deleting resources, NOT removing finalizer yet")
+		return
 	}
 
 	if err := c.RemoveFinalizer(); err != nil {

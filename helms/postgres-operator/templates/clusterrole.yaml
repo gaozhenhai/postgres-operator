@@ -93,6 +93,7 @@ rules:
   - persistentvolumeclaims
   verbs:
   - delete
+  - deletecollection
   - get
   - list
   - patch
@@ -110,6 +111,7 @@ rules:
   - pods
   verbs:
   - delete
+  - deletecollection
   - get
   - list
   - patch

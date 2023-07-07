@@ -13,9 +13,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	acidv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
 	"github.com/zalando/postgres-operator/pkg/spec"
-	"github.com/zalando/postgres-operator/pkg/util"
 	"github.com/zalando/postgres-operator/pkg/util/constants"
 	"github.com/zalando/postgres-operator/pkg/util/filesystems"
+	"github.com/zalando/postgres-operator/pkg/util/k8sutil"
 	"github.com/zalando/postgres-operator/pkg/util/volumes"
 )
 
@@ -242,20 +242,14 @@ func (c *Cluster) listPersistentVolumeClaims() ([]v1.PersistentVolumeClaim, erro
 
 func (c *Cluster) deletePersistentVolumeClaims() error {
 	c.logger.Debugln("deleting PVCs")
-	pvcs, err := c.listPersistentVolumeClaims()
-	if err != nil {
+
+	listOptions := metav1.ListOptions{
+		LabelSelector: c.labelsSet(false).String(),
+	}
+
+	if err := c.KubeClient.PersistentVolumeClaims(c.Namespace).DeleteCollection(context.TODO(), metav1.DeleteOptions{}, listOptions); err != nil && !k8sutil.ResourceNotFound(err) {
+		c.logger.Warningf("could not delete PersistentVolumeClaims: %v", err)
 		return err
-	}
-	for _, pvc := range pvcs {
-		c.logger.Debugf("deleting PVC %q", util.NameFromMeta(pvc.ObjectMeta))
-		if err := c.KubeClient.PersistentVolumeClaims(pvc.Namespace).Delete(context.TODO(), pvc.Name, c.deleteOptions); err != nil {
-			c.logger.Warningf("could not delete PersistentVolumeClaim: %v", err)
-		}
-	}
-	if len(pvcs) > 0 {
-		c.logger.Debugln("PVCs have been deleted")
-	} else {
-		c.logger.Debugln("no PVCs to delete")
 	}
 
 	return nil

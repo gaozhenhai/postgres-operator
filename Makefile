@@ -1,4 +1,4 @@
-.PHONY: clean local test linux macos mocks docker push scm-source.json e2e
+.PHONY: clean local test linux macos mocks docker push scm-source.json e2e run
 
 BINARY ?= postgres-operator
 BUILD_FLAGS ?= -v
@@ -108,3 +108,7 @@ codegen:
 
 e2e: docker # build operator image to be tested
 	cd e2e; make e2etest
+
+run: local
+	CONTROLLER_ID=gaozh OPERATOR_NAMESPACE="*" ./build/${BINARY} -outofcluster=true -kubeconfig=/Users/gaozh/.kube/config
+

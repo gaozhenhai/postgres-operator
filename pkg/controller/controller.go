@@ -77,6 +77,8 @@ type Controller struct {
 // NewController creates a new controller
 func NewController(controllerConfig *spec.ControllerConfig, controllerId string) *Controller {
 	logger := logrus.New()
+	logger.SetFormatter(&logrus.TextFormatter{FullTimestamp: true, TimestampFormat: "2006-02-01 15:04:05.000"})
+
 	if controllerConfig.EnableJsonLogging {
 		logger.SetFormatter(&logrus.JSONFormatter{})
 	} else {
@@ -344,7 +346,7 @@ func (c *Controller) initController() {
 		c.logger.Logger.Level = logrus.DebugLevel
 	}
 
-	logMultiLineConfig(c.logger, c.opConfig.MustMarshal())
+	// logMultiLineConfig(c.logger, c.opConfig.MustMarshal())
 
 	roleDefs := c.getInfrastructureRoleDefinitions()
 	if infraRoles, err := c.getInfrastructureRoles(roleDefs); err != nil {

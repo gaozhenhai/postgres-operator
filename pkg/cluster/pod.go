@@ -16,6 +16,7 @@ import (
 	acidv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
 	"github.com/zalando/postgres-operator/pkg/spec"
 	"github.com/zalando/postgres-operator/pkg/util"
+	"github.com/zalando/postgres-operator/pkg/util/k8sutil"
 	"github.com/zalando/postgres-operator/pkg/util/patroni"
 	"github.com/zalando/postgres-operator/pkg/util/retryutil"
 )
@@ -110,25 +111,14 @@ func (c *Cluster) getRollingUpdateFlagFromPod(pod *v1.Pod) (flag bool) {
 
 func (c *Cluster) deletePods() error {
 	c.logger.Debugln("deleting pods")
-	pods, err := c.listPods()
-	if err != nil {
+
+	listOptions := metav1.ListOptions{
+		LabelSelector: c.labelsSet(false).String(),
+	}
+
+	if err := c.KubeClient.Pods(c.Namespace).DeleteCollection(context.TODO(), metav1.DeleteOptions{}, listOptions); err != nil && !k8sutil.ResourceNotFound(err) {
+		c.logger.Errorf("could not delete pods %v", err)
 		return err
-	}
-
-	for _, obj := range pods {
-		podName := util.NameFromMeta(obj.ObjectMeta)
-
-		c.logger.Debugf("deleting pod %q", podName)
-		if err := c.deletePod(podName); err != nil {
-			c.logger.Errorf("could not delete pod %q: %v", podName, err)
-		} else {
-			c.logger.Infof("pod %q has been deleted", podName)
-		}
-	}
-	if len(pods) > 0 {
-		c.logger.Debugln("pods have been deleted")
-	} else {
-		c.logger.Debugln("no pods to delete")
 	}
 
 	return nil
