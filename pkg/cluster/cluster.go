@@ -809,7 +809,6 @@ func (c *Cluster) HasFinalizer() bool {
 func (c *Cluster) Update(oldSpec, newSpec *acidv1.Postgresql) error {
 	updateFailed := false
 	syncStatefulSet := false
-	stopFailed := false
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -825,9 +824,7 @@ func (c *Cluster) Update(oldSpec, newSpec *acidv1.Postgresql) error {
 	c.setSpec(newSpec)
 
 	defer func() {
-		if stopFailed {
-			c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusStopFailed)
-		} else if newSpec.Spec.Pause {
+		if newSpec.Spec.Pause {
 			c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusStopped)
 		} else if updateFailed {
 			c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusUpdateFailed)
@@ -919,7 +916,6 @@ func (c *Cluster) Update(oldSpec, newSpec *acidv1.Postgresql) error {
 				c.logger.Infof("stopping cluster %s", newSpec.Name)
 				if err := c.waitForAllPodsDeleted(); err != nil {
 					c.logger.Warningf("could not delete all pod %v", err)
-					stopFailed = true
 				}
 				return
 			}
