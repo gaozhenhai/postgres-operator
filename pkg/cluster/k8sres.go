@@ -1342,7 +1342,7 @@ func (c *Cluster) generateStatefulSet(spec *acidv1.PostgresSpec) (*appsv1.Statef
 	}
 
 	if volumeClaimTemplate, err = c.generatePersistentVolumeClaimTemplate(spec.Volume.Size,
-		spec.Volume.StorageClass, spec.Volume.Selector); err != nil {
+		spec.Volume.StorageClass, spec.Volume.AccessMode, spec.Volume.Selector); err != nil {
 		return nil, fmt.Errorf("could not generate volume claim template: %v", err)
 	}
 
@@ -1594,12 +1594,17 @@ func (c *Cluster) addAdditionalVolumes(podSpec *v1.PodSpec,
 	podSpec.Volumes = volumes
 }
 
-func (c *Cluster) generatePersistentVolumeClaimTemplate(volumeSize, volumeStorageClass string,
+func (c *Cluster) generatePersistentVolumeClaimTemplate(volumeSize, volumeStorageClass, accessMode string,
 	volumeSelector *metav1.LabelSelector) (*v1.PersistentVolumeClaim, error) {
 
 	var storageClassName *string
 	if volumeStorageClass != "" {
 		storageClassName = &volumeStorageClass
+	}
+
+	persistentVolumeAccessMode := v1.ReadWriteOnce
+	if accessMode != "" {
+		persistentVolumeAccessMode = v1.PersistentVolumeAccessMode(accessMode)
 	}
 
 	quantity, err := resource.ParseQuantity(volumeSize)
@@ -1615,7 +1620,7 @@ func (c *Cluster) generatePersistentVolumeClaimTemplate(volumeSize, volumeStorag
 			Labels:      c.labelsSet(true),
 		},
 		Spec: v1.PersistentVolumeClaimSpec{
-			AccessModes: []v1.PersistentVolumeAccessMode{v1.ReadWriteOnce},
+			AccessModes: []v1.PersistentVolumeAccessMode{persistentVolumeAccessMode},
 			Resources: v1.ResourceRequirements{
 				Requests: v1.ResourceList{
 					v1.ResourceStorage: quantity,

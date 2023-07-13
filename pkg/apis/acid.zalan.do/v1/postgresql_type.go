@@ -125,6 +125,7 @@ type MaintenanceWindow struct {
 type Volume struct {
 	Selector     *metav1.LabelSelector `json:"selector,omitempty"`
 	Size         string                `json:"size"`
+	AccessMode   string                `json:"accessMode,omitempty"`
 	StorageClass string                `json:"storageClass,omitempty"`
 	SubPath      string                `json:"subPath,omitempty"`
 	Iops         *int64                `json:"iops,omitempty"`

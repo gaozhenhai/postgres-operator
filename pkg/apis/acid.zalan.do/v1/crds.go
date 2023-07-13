@@ -1031,6 +1031,9 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 								Type:    "string",
 								Pattern: "^(\\d+(e\\d+)?|\\d+(\\.\\d+)?(e\\d+)?[EPTGMK]i?)$",
 							},
+							"accessMode": {
+								Type: "string",
+							},
 							"storageClass": {
 								Type: "string",
 							},
