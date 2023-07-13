@@ -69,7 +69,7 @@ spec:
       timezone: "PRC"
       log_timezone: "PRC"
       log_statement: "mod"
-      log_destination: "stderr"
+      log_destination: "csvlog"
       log_rotation_age: "1d"
       log_connections: "off"
       log_disconnections: "off"
