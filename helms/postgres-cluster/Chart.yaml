@@ -1,0 +1,8 @@
+apiVersion: v2
+appVersion: 2.1.0
+description: A Helm chart for deploying the Postgres cluster
+name: postgres-cluster
+keywords:
+- postgres
+- pg
+version: 2.1.0
