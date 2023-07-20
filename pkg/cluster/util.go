@@ -368,6 +368,10 @@ func (c *Cluster) waitForPodDeletion(podEvents chan PodEvent) error {
 func (c *Cluster) waitStatefulsetReady() error {
 	return retryutil.Retry(c.OpConfig.ResourceCheckInterval, c.OpConfig.ResourceCheckTimeout,
 		func() (bool, error) {
+			if c.checkClusterIsPauseOrDeleted() {
+				return true, nil
+			}
+
 			listOptions := metav1.ListOptions{
 				LabelSelector: c.labelsSet(false).String(),
 			}
@@ -418,6 +422,10 @@ func (c *Cluster) _waitPodLabelsReady(anyReplica bool) error {
 
 	err := retryutil.Retry(c.OpConfig.ResourceCheckInterval, c.OpConfig.ResourceCheckTimeout,
 		func() (bool, error) {
+			if c.checkClusterIsPauseOrDeleted() {
+				return true, nil
+			}
+
 			masterCount := 0
 			if !anyReplica {
 				masterPods, err2 := c.KubeClient.Pods(namespace).List(context.TODO(), masterListOption)
@@ -454,8 +462,22 @@ func (c *Cluster) waitForAllPodsLabelReady() error {
 	return c._waitPodLabelsReady(false)
 }
 
+func (c *Cluster) checkClusterIsPauseOrDeleted() bool {
+	postgreSQL, err := c.KubeClient.PostgresqlsGetter.Postgresqls(c.Namespace).Get(context.TODO(), c.Name, metav1.GetOptions{})
+	if err != nil && !k8sutil.ResourceNotFound(err) {
+		c.logger.Warningf("get cluster %s/%s resource is failed, error: %v", c.Namespace, c.Name, err)
+		return true
+	}
+
+	if !postgreSQL.DeletionTimestamp.IsZero() {
+		c.SetDeletionTimestamp(postgreSQL.DeletionTimestamp)
+	}
+
+	return (postgreSQL.Spec.Pause || !postgreSQL.DeletionTimestamp.IsZero())
+}
+
 func (c *Cluster) waitForAllPodsDeleted() error {
-	return retryutil.Retry(c.OpConfig.ResourceCheckInterval, c.OpConfig.ResourceCheckTimeout,
+	return retryutil.Retry(c.OpConfig.ResourceCheckInterval, c.OpConfig.PodDeletionWaitTimeout,
 		func() (bool, error) {
 			listOptions := metav1.ListOptions{
 				LabelSelector: c.labelsSet(false).String(),

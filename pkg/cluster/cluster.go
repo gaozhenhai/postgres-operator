@@ -331,6 +331,12 @@ func (c *Cluster) Create() error {
 		c.logger.Errorf("failed to create cluster: %v", err)
 		return err
 	}
+
+	if !c.DeletionTimestamp.IsZero() {
+		c.logger.Warningf("cluster %s/%s will be deleted", c.Namespace, c.Name)
+		return nil
+	}
+
 	c.logger.Infof("pods are ready")
 	c.eventRecorder.Event(c.GetReference(), v1.EventTypeNormal, "StatefulSet", "Pods are ready")
 

@@ -93,6 +93,7 @@ spec:
   volume:
     size: 20Gi
     storageClass: ssd
+    accessMode: ReadWriteOnce
 
   podAnnotations:
     prometheus.io/scrape: "true"
