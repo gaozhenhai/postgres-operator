@@ -1,6 +1,6 @@
 image:
   repository: 10.56.184.75:8000/system_containers/spilo-14
-  tag: 2.1-p6-dev
+  tag: 2.1-p6
 
 replicaCount: 3
 password: "Pass@word1"

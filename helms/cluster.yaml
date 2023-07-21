@@ -22,7 +22,7 @@ metadata:
   name: pg
 spec:
   numberOfInstances: 3
-  dockerImage: 10.56.184.75:8000/system_containers/spilo-14:2.1-p6-dev
+  dockerImage: 10.56.184.75:8000/system_containers/spilo-14:2.1-p6
   resources:
     requests:
       cpu: 10m
