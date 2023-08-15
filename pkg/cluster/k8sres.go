@@ -1728,7 +1728,7 @@ func (c *Cluster) shouldCreateLoadBalancerForService(role PostgresRole, spec *ac
 
 func (c *Cluster) generateService(role PostgresRole, spec *acidv1.PostgresSpec) *v1.Service {
 	serviceSpec := v1.ServiceSpec{
-		Ports: []v1.ServicePort{{Name: "postgresql", Port: pgPort, TargetPort: intstr.IntOrString{IntVal: pgPort}}},
+		Ports: []v1.ServicePort{{Name: "tcp-" + c.serviceName(role), Port: pgPort, TargetPort: intstr.IntOrString{IntVal: pgPort}}},
 		Type:  v1.ServiceTypeClusterIP,
 	}
 
@@ -1777,8 +1777,36 @@ func (c *Cluster) generateServiceAnnotations(role PostgresRole, spec *acidv1.Pos
 	for k, v := range c.OpConfig.CustomServiceAnnotations {
 		annotations[k] = v
 	}
+
+	// for tenx haproxy
+	generateProxyKey := func(role PostgresRole, key string) (string, bool) {
+		isSkip := true
+
+		if (role == Replica && strings.HasPrefix(key, "slave.")) ||
+			(role == Master && strings.HasPrefix(key, "master.")) {
+			isSkip = false
+		}
+
+		switch key {
+		case "master." + SYSTEM_LBGROUP, "slave." + SYSTEM_LBGROUP:
+			return SYSTEM_LBGROUP, isSkip
+		case "master." + SYSTEM_SCHEMAPORTNAME, "slave." + SYSTEM_SCHEMAPORTNAME:
+			return SYSTEM_SCHEMAPORTNAME, isSkip
+		case "master." + SYSTEM_CUSTOMPORTS, "slave." + SYSTEM_CUSTOMPORTS:
+			return SYSTEM_CUSTOMPORTS, isSkip
+		}
+
+		return "", isSkip
+	}
+
 	if spec != nil || spec.ServiceAnnotations != nil {
 		for k, v := range spec.ServiceAnnotations {
+			if proxyKey, isSkip := generateProxyKey(role, k); proxyKey != "" {
+				if !isSkip {
+					annotations[proxyKey] = v
+				}
+				continue
+			}
 			annotations[k] = v
 		}
 	}

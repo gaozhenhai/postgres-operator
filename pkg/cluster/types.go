@@ -22,6 +22,11 @@ const (
 	Leader        PostgresRole = "leader"
 	StandbyLeader PostgresRole = "standby_leader"
 	SyncStandby   PostgresRole = "sync_standby"
+
+	// for tenx haproxy
+	SYSTEM_LBGROUP        string = "system/lbgroup"
+	SYSTEM_SCHEMAPORTNAME string = "system/schemaPortname"
+	SYSTEM_CUSTOMPORTS    string = "system/customPorts"
 )
 
 // PodEventType represents the type of a pod-related event
