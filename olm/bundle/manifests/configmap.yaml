@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-operator
+data:
+  additional_pod_capabilities: SYS_RESOURCE
+  cluster_labels: system/daas-type:postgresql
+  cluster_name_label: system/daas-cluster
+  debug_logging: "true"
+  pod_management_policy: parallel
+  repair_period: 4m
+  resource_check_interval: 3s
+  resource_check_timeout: 5m
+  resync_period: 8m
+  watched_namespace: ''
+  workers: "8"

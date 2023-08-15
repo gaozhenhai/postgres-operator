@@ -1,0 +1,12 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: daas-registry-postgres
+  namespace: operator-hub
+  labels:
+    source-ns: operator-hub
+spec:
+  displayName: built-in postgres registry
+  image: 172.22.16.104/system_containers/daas-postgres-registry:0.1.4
+  publisher: system admin
+  sourceType: grpc
