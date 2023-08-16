@@ -1364,10 +1364,11 @@ func (c *Cluster) generateStatefulSet(spec *acidv1.PostgresSpec) (*appsv1.Statef
 
 	statefulSet := &appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        c.statefulSetName(),
-			Namespace:   c.Namespace,
-			Labels:      c.labelsSet(true),
-			Annotations: c.AnnotationsToPropagate(c.annotationsSet(nil)),
+			Name:            c.statefulSetName(),
+			Namespace:       c.Namespace,
+			Labels:          c.labelsSet(true),
+			Annotations:     c.AnnotationsToPropagate(c.annotationsSet(nil)),
+			OwnerReferences: c.OwnerReferencesForCR(),
 		},
 		Spec: appsv1.StatefulSetSpec{
 			Replicas:             &numberOfInstances,
@@ -1381,6 +1382,20 @@ func (c *Cluster) generateStatefulSet(spec *acidv1.PostgresSpec) (*appsv1.Statef
 	}
 
 	return statefulSet, nil
+}
+
+func (c *Cluster) OwnerReferencesForCR() []metav1.OwnerReference {
+	controller := true
+
+	return []metav1.OwnerReference{
+		{
+			UID:        c.Postgresql.ObjectMeta.UID,
+			APIVersion: "acid.zalan.do/v1",
+			Kind:       "postgresql",
+			Name:       c.Postgresql.ObjectMeta.Name,
+			Controller: &controller,
+		},
+	}
 }
 
 func (c *Cluster) generatePodAnnotations(spec *acidv1.PostgresSpec) map[string]string {

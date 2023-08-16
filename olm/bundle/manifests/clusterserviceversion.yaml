@@ -202,6 +202,15 @@ spec:
           - get
           - list
           - watch
+        - apiGroups:
+          - apiextensions.k8s.io
+          resources:
+          - customresourcedefinitions
+          verbs:
+          - get
+          - create
+          - patch
+          - update
         serviceAccountName: postgres-operator
       permissions:
       - rules:
@@ -344,6 +353,15 @@ spec:
           verbs:
           - get
           - create
+        - apiGroups:
+          - policy
+          - extensions
+          resourceNames:
+          - default
+          resources:
+          - podsecuritypolicies
+          verbs:
+          - use
         serviceAccountName: postgres-operator
       - rules:
         - apiGroups:
