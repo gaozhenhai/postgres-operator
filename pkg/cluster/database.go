@@ -134,6 +134,10 @@ func (c *Cluster) initDbConnWithName(dbname string) error {
 
 	finalerr := retryutil.Retry(constants.PostgresConnectTimeout, constants.PostgresConnectRetryTimeout,
 		func() (bool, error) {
+			if c.checkClusterIsPauseOrDeleted() {
+				return true, nil
+			}
+
 			var err error
 			conn, err = sql.Open("postgres", connstring)
 			if err == nil {

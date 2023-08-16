@@ -158,7 +158,7 @@ spec:
   install:
     spec:
       deployments:
-      - name: postgresql-cluster-operator
+      - name: postgres-operator
         spec:
           progressDeadlineSeconds: 600
           replicas: 1
@@ -325,6 +325,17 @@ spec:
           - get
           - list
           - patch
+        - apiGroups:
+          - batch
+          resources:
+          - cronjobs
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
         - apiGroups:
           - ""
           resources:

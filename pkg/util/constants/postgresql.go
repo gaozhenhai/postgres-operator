@@ -11,7 +11,7 @@ const (
 	PatroniPGParametersParameterName = "parameters"
 
 	PostgresConnectRetryTimeout = 2 * time.Minute
-	PostgresConnectTimeout      = 15 * time.Second
+	PostgresConnectTimeout      = 5 * time.Second
 
 	ShmVolumeName = "dshm"
 	ShmVolumePath = "/dev/shm"
