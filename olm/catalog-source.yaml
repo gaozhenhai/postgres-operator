@@ -6,6 +6,6 @@ metadata:
     source-ns: gaozh
 spec:
   displayName: built-in postgres registry
-  image: 172.22.50.227/system_containers/daas-postgres-registry:0.1.4
+  image: 172.22.50.227/system_containers/daas-postgres-registry:0.1.5
   publisher: system admin
   sourceType: grpc
