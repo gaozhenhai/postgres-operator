@@ -443,6 +443,12 @@ func (c *Controller) queueClusterEvent(informerOldSpec, informerNewSpec *acidv1.
 		}
 	}
 
+	if eventType == EventUpdate {
+		if informerNewSpec.Spec.Pause && !informerNewSpec.Status.Stopped() {
+			c.KubeClient.SetPostgresCRDStatus(clusterName, acidv1.ClusterStatusStopping)
+		}
+	}
+
 	if clusterError != "" && eventType != EventDelete {
 		c.logger.WithField("cluster-name", clusterName).Debugf("skipping %q event for the invalid cluster: %s", eventType, clusterError)
 

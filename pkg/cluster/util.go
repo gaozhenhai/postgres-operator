@@ -369,6 +369,7 @@ func (c *Cluster) waitStatefulsetReady() error {
 	return retryutil.Retry(c.OpConfig.ResourceCheckInterval, c.OpConfig.ResourceCheckTimeout,
 		func() (bool, error) {
 			if c.checkClusterIsPauseOrDeleted() {
+				c.logger.Warningf("%s/%s is pause or deleted", c.Namespace, c.Name)
 				return true, nil
 			}
 
@@ -423,6 +424,7 @@ func (c *Cluster) _waitPodLabelsReady(anyReplica bool) error {
 	err := retryutil.Retry(c.OpConfig.ResourceCheckInterval, c.OpConfig.ResourceCheckTimeout,
 		func() (bool, error) {
 			if c.checkClusterIsPauseOrDeleted() {
+				c.logger.Warningf("%s/%s is pause or deleted", c.Namespace, c.Name)
 				return true, nil
 			}
 

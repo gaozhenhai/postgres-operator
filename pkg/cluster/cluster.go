@@ -252,7 +252,9 @@ func (c *Cluster) Create() error {
 		if err == nil {
 			c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusRunning) //TODO: are you sure it's running?
 		} else {
-			c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusAddFailed)
+			if !c.checkClusterIsPauseOrDeleted() {
+				c.KubeClient.SetPostgresCRDStatus(c.clusterName(), acidv1.ClusterStatusAddFailed)
+			}
 		}
 	}()
 
