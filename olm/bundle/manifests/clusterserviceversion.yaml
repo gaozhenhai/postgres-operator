@@ -12,7 +12,6 @@ metadata:
             },
             "spec": {
                 "numberOfInstances": 3,
-                "dockerImage": "dev-registry.tenxcloud.com/system_containers/spilo-14:2.1-p6",
                 "patroni": {
                     "initdb": {
                         "encoding": "UTF8",
