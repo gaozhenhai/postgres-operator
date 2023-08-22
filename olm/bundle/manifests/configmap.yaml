@@ -3,7 +3,6 @@ kind: ConfigMap
 metadata:
   name: postgres-operator
 data:
-  docker_image: dev-registry.tenxcloud.com/system_containers/spilo-14:2.1-p6
   additional_pod_capabilities: SYS_RESOURCE
   cluster_labels: system/daas-type:postgresql
   cluster_name_label: system/daas-cluster
