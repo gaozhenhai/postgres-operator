@@ -5,7 +5,7 @@ metadata:
 type: Opaque
 stringData:
   username: postgres
-  password: Pass@word1
+  password: Passw0rd1
 ---
 apiVersion: v1
 kind: Secret
