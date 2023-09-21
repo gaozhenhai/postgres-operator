@@ -586,17 +586,18 @@ func (c *Cluster) checkAndSetGlobalPostgreSQLConfiguration(pod *v1.Pod, effectiv
 	}
 
 	// check if specified slots exist in config and if they differ
-	slotsToSet := make(map[string]map[string]string)
-	for slotName, desiredSlot := range desiredPatroniConfig.Slots {
-		if effectiveSlot, exists := effectivePatroniConfig.Slots[slotName]; exists {
-			if reflect.DeepEqual(desiredSlot, effectiveSlot) {
-				continue
+	if !reflect.DeepEqual(effectivePatroniConfig.Slots, desiredPatroniConfig.Slots) {
+		for slotName, _ := range effectivePatroniConfig.Slots {
+			if len(desiredPatroniConfig.Slots) == 0 {
+				break
+			}
+
+			if _, exists := desiredPatroniConfig.Slots[slotName]; !exists {
+				desiredPatroniConfig.Slots[slotName] = nil
 			}
 		}
-		slotsToSet[slotName] = desiredSlot
-	}
-	if len(slotsToSet) > 0 {
-		configToSet["slots"] = slotsToSet
+
+		configToSet["slots"] = desiredPatroniConfig.Slots
 	}
 
 	// compare effective and desired parameters under postgresql section in Patroni config

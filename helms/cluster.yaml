@@ -89,6 +89,11 @@ spec:
     initdb:
       encoding: "UTF8"
       locale: "en_US.UTF-8"
+#    slots:
+#      test_slots:
+#        type: logical
+#        database: test
+#        plugin: logical_tool
 
   volume:
     size: 20Gi
